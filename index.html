@@ -9,12 +9,7 @@
 html, body { width: 100%; height: 100%; overflow: hidden; background: #000; touch-action: none; }
 #container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
 #canvas { display: block; max-width: 100%; max-height: 100%; }
-#rotate-prompt {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(180deg, #1a1a2e, #16213e);
-    color: #fff; font-family: Arial; text-align: center;
-    justify-content: center; align-items: center; flex-direction: column; z-index: 9999;
-}
+#rotate-prompt { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #1a1a2e, #16213e); color: #fff; font-family: Arial; text-align: center; justify-content: center; align-items: center; flex-direction: column; z-index: 9999; }
 .icon { font-size: 80px; margin-bottom: 20px; animation: rotate 1s infinite; }
 @keyframes rotate { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
 #skip-btn { margin-top: 30px; padding: 15px 40px; font-size: 18px; background: #e94560; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
