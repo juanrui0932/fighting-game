@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <title>格斗对决 - 凯总 vs 亮子</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+#container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+}
+#rotate-prompt {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 9999;
+}
+#rotate-prompt .icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    animation: rotate 1s ease-in-out infinite;
+}
+@keyframes rotate {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+}
+#status {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+}
+#status-splash {
+    max-width: 80%;
+    max-height: 60%;
+}
+#status-progress {
+    width: 60%;
+    height: 20px;
+    margin-top: 20px;
+}
+#loading-text {
+    color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    margin-top: 15px;
+}
+    </style>
+    <link rel="icon" type="image/png" href="index.icon.png">
+    <link rel="apple-touch-icon" href="index.apple-touch-icon.png">
+</head>
+<body>
+    <div id="rotate-prompt">
+        <div class="icon">📱</div>
+        <div>请旋转设备至横屏模式</div>
+        <div style="font-size: 14px; margin-top: 10px; color: #888;">Please rotate to landscape mode</div>
+    </div>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="status">
+        <img id="status-splash" src="index.png" alt="">
+        <progress id="status-progress"></progress>
+        <div id="loading-text">正在加载游戏...</div>
+    </div>
+    <script src="index.js"></script>
+    <script>
+// 强制横屏检测
+function checkOrientation() {
+    var isLandscape = window.innerWidth > window.innerHeight;
+    var prompt = document.getElementById('rotate-prompt');
+    var container = document.getElementById('container');
+    
+    if (!isLandscape && window.innerWidth < 800) {
+        prompt.style.display = 'flex';
+        container.style.display = 'none';
+    } else {
+        prompt.style.display = 'none';
+        container.style.display = 'flex';
+    }
+}
+
+// 尝试锁定屏幕方向
+function lockOrientation() {
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function(e) {
+                console.log('Orientation lock not supported');
+            });
+        }
+    } catch(e) {}
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+document.addEventListener('DOMContentLoaded', function() {
+    checkOrientation();
+    lockOrientation();
+});
+
+// Godot配置
+const GODOT_CONFIG = {
+    "args": [],
+    "canvasResizePolicy": 2,
+    "ensureCrossOriginIsolationHeaders": true,
+    "executable": "index",
+    "experimentalVK": false,
+    "fileSizes": {
+        "index.pck": 82887072,
+        "index.wasm": 35376909
+    },
+    "focusCanvas": true,
+    "gdextensionLibs": []
+};
+
+const engine = new Engine(GODOT_CONFIG);
+const statusProgress = document.getElementById('status-progress');
+const loadingText = document.getElementById('loading-text');
+const statusDiv = document.getElementById('status');
+
+statusDiv.style.visibility = 'visible';
+statusProgress.style.display = 'block';
+
+engine.startGame({
+    'onProgress': function(current, total) {
+        if (total > 0) {
+            statusProgress.value = current / total;
+            var percent = Math.round(current / total * 100);
+            loadingText.textContent = '加载中... ' + percent + '%';
+        }
+        if (current === total) {
+            loadingText.textContent = '启动中...';
+            setTimeout(function() {
+                statusDiv.style.visibility = 'hidden';
+            }, 500);
+        }
+    }
+}).then(function() {
+    console.log('Game started');
+}, function(err) {
+    loadingText.textContent = '加载失败: ' + (err.message || err);
+    console.error(err);
+});
+    </script>
+</body>
+</html>
