@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="full-screen" content="yes">
+    <title>格斗对决 - 凯总 vs 亮子</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background-color: #000; touch-action: none; }
+#container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+#canvas { display: block; max-width: 100%; max-height: 100%; }
+#rotate-prompt {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #000; color: #fff; font-family: Arial; font-size: 24px;
+    text-align: center; justify-content: center; align-items: center; flex-direction: column; z-index: 9999;
+}
+#status {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1a1a2e; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; visibility: hidden;
+}
+#status-progress { width: 60%; height: 20px; margin-top: 20px; }
+#loading-text { color: #fff; font-family: Arial; font-size: 18px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div id="rotate-prompt">
+        <div style="font-size:80px;">📱</div>
+        <div>请旋转设备至横屏模式</div>
+    </div>
+    <div id="container"><canvas id="canvas"></canvas></div>
+    <div id="status">
+        <progress id="status-progress"></progress>
+        <div id="loading-text">正在加载游戏...</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/gh/juanrui0932/fighting-game@main/index.js"></script>
+    <script>
+function checkOrientation() {
+    var isLandscape = window.innerWidth > window.innerHeight;
+    document.getElementById('rotate-prompt').style.display = (!isLandscape && window.innerWidth < 800) ? 'flex' : 'none';
+    document.getElementById('container').style.display = (!isLandscape && window.innerWidth < 800) ? 'none' : 'flex';
+}
+window.addEventListener('resize', checkOrientation);
+checkOrientation();
+
+const GODOT_CONFIG = {
+    "args": [], "canvasResizePolicy": 2, "ensureCrossOriginIsolationHeaders": true,
+    "executable": "https://cdn.jsdelivr.net/gh/juanrui0932/fighting-game@main/index",
+    "experimentalVK": false, "focusCanvas": true, "gdextensionLibs": []
+};
+const engine = new Engine(GODOT_CONFIG);
+document.getElementById('status').style.visibility = 'visible';
+engine.startGame({
+    'onProgress': function(c, t) {
+        document.getElementById('status-progress').value = c / t;
+        document.getElementById('loading-text').textContent = '加载中... ' + Math.round(c/t*100) + '%';
+    }
+}).then(function() {
+    document.getElementById('status').style.visibility = 'hidden';
+}, function(err) {
+    document.getElementById('loading-text').textContent = '加载失败';
+});
+    </script>
+</body>
+</html>
